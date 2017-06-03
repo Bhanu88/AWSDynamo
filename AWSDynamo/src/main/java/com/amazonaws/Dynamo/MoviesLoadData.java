@@ -33,75 +33,70 @@ public class MoviesLoadData {
 	static AmazonDynamoDBClient dynamoDB;
 
 	private static void init() throws Exception {
-        /*
-         * The ProfileCredentialsProvider will return your [default]
-         * credential profile by reading from the credentials file located at
-         * (C:\\Users\\gebruiker\\.aws\\credentials).
-         */
-        AWSCredentials credentials = null;
-        try {
-            credentials = new ProfileCredentialsProvider("default").getCredentials();
-        } catch (Exception e) {
-            throw new AmazonClientException(
-                    "Cannot load the credentials from the credential profiles file. " +
-                    "Please make sure that your credentials file is at the correct " +
-                    "location (C:\\Users\\gebruiker\\.aws\\credentials), and is in valid format.",
-                    e);
-        }
-        dynamoDB = new AmazonDynamoDBClient(credentials);
-        Region usWest2 = Region.getRegion(Regions.US_WEST_2);
-        dynamoDB.setRegion(usWest2);
-    }
-	
-	
-	
-    public static void main(String[] args) throws Exception {
-    	init();
-        
+		/*
+		 * The ProfileCredentialsProvider will return your [default] credential
+		 * profile by reading from the credentials file located at
+		 * (C:\\Users\\gebruiker\\.aws\\credentials).
+		 */
+		AWSCredentials credentials = null;
+		try {
+			credentials = new ProfileCredentialsProvider("default").getCredentials();
+		} catch (Exception e) {
+			throw new AmazonClientException("Cannot load the credentials from the credential profiles file. "
+					+ "Please make sure that your credentials file is at the correct "
+					+ "location (C:\\Users\\gebruiker\\.aws\\credentials), and is in valid format.", e);
+		}
+		dynamoDB = new AmazonDynamoDBClient(credentials);
+		Region usWest2 = Region.getRegion(Regions.US_WEST_2);
+		dynamoDB.setRegion(usWest2);
+	}
 
-    	String tableName = "Movies";
+	public static void main(String[] args) throws Exception {
+		init();
 
-        JsonParser parser = new JsonFactory().createParser(new File("C:\\Users\\gebruiker\\workspace\\AWSDynamo\\src\\main\\java\\com\\amazonaws\\Dynamo\\moviedata.json"));
+		String tableName = "Movies";
 
-        JsonNode rootNode = new ObjectMapper().readTree(parser);
-        Iterator<JsonNode> iter = rootNode.iterator();
+		JsonParser parser = new JsonFactory().createParser(new File(
+				"C:\\Users\\gebruiker\\workspace\\AWSDynamo\\src\\main\\java\\com\\amazonaws\\Dynamo\\moviedata.json"));
 
-        ObjectNode currentNode;
+		JsonNode rootNode = new ObjectMapper().readTree(parser);
+		Iterator<JsonNode> iter = rootNode.iterator();
 
-        while (iter.hasNext()) {
-            currentNode = (ObjectNode) iter.next();
+		ObjectNode currentNode;
 
-            int year = currentNode.path("year").asInt();
-            String title = currentNode.path("title").asText();
-            
-           // Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+		while (iter.hasNext()) {
+			currentNode = (ObjectNode) iter.next();
 
-          Item item =  new Item().withPrimaryKey("year", year, "title", title).withJSON("info",
-                    currentNode.path("info").toString());
-           // Item item = new Item().withJSON("document", jsonStr);
-            Map<String,AttributeValue> attributes = InternalUtils.toAttributeValues(item);
-            
-            
-          //  item.put("year", new AttributeValue().withN(Integer.toString(year)));
-            //item.put("title", new AttributeValue(title));
-            //item.put("Info",new AttributeValue() );
-            
-            
-            
+			int year = currentNode.path("year").asInt();
+			String title = currentNode.path("title").asText();
 
-            try {
-                //table.putItem(new Item().withPrimaryKey("year", year, "title", title).withJSON("info", currentNode.path("info").toString()));
-            	PutItemRequest putItemRequest = new PutItemRequest(tableName,attributes);
-                PutItemResult putItemResult = dynamoDB.putItem(putItemRequest);
-                System.out.println("PutItem succeeded: " + year + " " + title);
+			// Map<String, AttributeValue> item = new HashMap<String,
+			// AttributeValue>();
 
-            }
-            catch (Exception e) {
-                System.err.println("Unable to add movie: " + year + " " + title);
-                System.err.println(e.getMessage());
-                break;
-            }
-        }
-        parser.close();
-    }
+			Item item = new Item().withPrimaryKey("year", year, "title", title).withJSON("info",
+					currentNode.path("info").toString());
+			// Item item = new Item().withJSON("document", jsonStr);
+			Map<String, AttributeValue> attributes = InternalUtils.toAttributeValues(item);
+
+			// item.put("year", new
+			// AttributeValue().withN(Integer.toString(year)));
+			// item.put("title", new AttributeValue(title));
+			// item.put("Info",new AttributeValue() );
+
+			try {
+				// table.putItem(new Item().withPrimaryKey("year", year,
+				// "title", title).withJSON("info",
+				// currentNode.path("info").toString()));
+				PutItemRequest putItemRequest = new PutItemRequest(tableName, attributes);
+				PutItemResult putItemResult = dynamoDB.putItem(putItemRequest);
+				System.out.println("PutItem succeeded: " + year + " " + title);
+
+			} catch (Exception e) {
+				System.err.println("Unable to add movie: " + year + " " + title);
+				System.err.println(e.getMessage());
+				break;
+			}
+		}
+		parser.close();
+	}
 }
