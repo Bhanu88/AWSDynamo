@@ -1,1 +1,1 @@
-# AWSDynamo
+# AWS Samples
