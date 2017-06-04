@@ -35,11 +35,18 @@ public class MoviesDeleteItem {
 
 		init();
 		String tableName = "Movies";
+		
+			System.out.println("Attempting to create table; please wait...");
 		Map<String, AttributeValue> key = new HashMap<>();
 		key.put("year", new AttributeValue().withN(Integer.toString(2013)));
 		key.put("title", new AttributeValue().withS("Dhoom 3"));
+		try {
 		DeleteItemRequest deleteitem = new DeleteItemRequest().withTableName(tableName).withKey(key);
 		DeleteItemResult deleteitemresult = dynamoDB.deleteItem(deleteitem);
 		System.out.println("item deleted");
+		}catch (Exception e) {
+			System.err.println("Unable to delete table: ");
+			System.err.println(e.getMessage());
+	}
 	}
 }
